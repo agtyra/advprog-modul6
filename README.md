@@ -20,3 +20,9 @@ This version of handle_connection improves the previous one by introducing reque
 ## Commit 4: Reflection Notes
 
 This version expands the server’s functionality by introducing a /sleep route that delays the response by 10 seconds before sending back hello.html. When testing with two browser windows, if one accesses /sleep, the other request (to /) also experiences a delay. This happens because the server handles requests sequentially, meaning each request blocks the next one until it’s completed. If multiple users were to access /sleep simultaneously, the server would struggle to respond quickly, causing noticeable slowdowns. This highlights a key limitation: the server is not designed to handle multiple connections at once. In a real-world scenario, a slow request like this could significantly degrade performance for all users.
+
+## Commit 5: Reflection Notes
+
+This version introduces a ThreadPool, allowing the server to handle multiple requests concurrently instead of sequentially. Previously, a slow request like /sleep would block all others, but now, multiple worker threads can handle different requests at the same time.
+The ThreadPool works by maintaining a fixed number of worker threads that listen for incoming jobs. When the server receives a new request, it sends the job (a closure) to a worker via a message-passing channel. Each worker continuously waits for a job, locks the receiver, retrieves a task, and executes it. By using Arc<Mutex<T>>, multiple workers can safely share the receiver while ensuring only one thread processes a job at a time. This prevents race conditions while allowing concurrency. Now, if multiple users request /sleep, the server can still respond to other requests without stalling.
+This implementation makes the server more efficient and scalable, as it can now handle multiple requests in parallel instead of being blocked by long-running tasks.
