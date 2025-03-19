@@ -16,3 +16,7 @@
 ![Commit 3 screen capture](/assets/images/commit3.png)
 
 This version of handle_connection improves the previous one by introducing request handling logic. Instead of blindly responding with hello.html, it now checks the request line to determine the appropriate response. If the request is "GET / HTTP/1.1", it serves hello.html with a 200 OK status. Otherwise, it returns 404.html with a 404 NOT FOUND status. The key change here is separating request handling from response construction. Previously, the function always sent the same response regardless of what the client requested. Now, it dynamically selects the status code and file based on the request, making it more adaptable.
+
+## Commit 4: Reflection Notes
+
+This version expands the server’s functionality by introducing a /sleep route that delays the response by 10 seconds before sending back hello.html. When testing with two browser windows, if one accesses /sleep, the other request (to /) also experiences a delay. This happens because the server handles requests sequentially, meaning each request blocks the next one until it’s completed. If multiple users were to access /sleep simultaneously, the server would struggle to respond quickly, causing noticeable slowdowns. This highlights a key limitation: the server is not designed to handle multiple connections at once. In a real-world scenario, a slow request like this could significantly degrade performance for all users.
